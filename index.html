@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Prórrogas MME - Datos actualizados Excel</title>
+  <title>Dashboard Prórrogas MME - Compensaciones editables en código</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -79,7 +79,7 @@
     }
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 18px;
     }
     .kpi-card {
@@ -93,10 +93,12 @@
     .kpi-teal { border-top-color: #0d9488; background: linear-gradient(135deg, #ffffff 70%, #ccfbf1 100%); }
     .kpi-green { border-top-color: #22c55e; background: linear-gradient(135deg, #ffffff 70%, #dcfce7 100%); }
     .kpi-gold { border-top-color: #f59e0b; background: linear-gradient(135deg, #ffffff 70%, #fef3c7 100%); }
+    .kpi-purple { border-top-color: #8b5cf6; background: linear-gradient(135deg, #ffffff 70%, #ede9fe 100%); }
     .kpi-blue .kpi-label { color: #0ea5e9; }
     .kpi-teal .kpi-label { color: #0d9488; }
     .kpi-green .kpi-label { color: #22c55e; }
     .kpi-gold .kpi-label { color: #f59e0b; }
+    .kpi-purple .kpi-label { color: #8b5cf6; }
     .kpi-label {
       font-size: 0.7rem;
       text-transform: uppercase;
@@ -350,7 +352,7 @@
 
 <header class="header">
   <div class="header-inner">
-    <div class="brand"><h1 class="brand-title">Prórrogas proyectos MME</h1><p>Datos actualizados Excel - Éxito Global 73%</p></div>
+    <div class="brand"><h1 class="brand-title">Prórrogas proyectos MME</h1><p>Compensaciones editables en código</p></div>
     <div class="meta-date" id="headerDate"></div>
   </div>
 </header>
@@ -371,6 +373,7 @@
     <div class="kpi-card kpi-teal"><div class="kpi-label">Total Días Reconocidos</div><div class="kpi-value" id="kpiDiasRec">—</div><div class="kpi-sub" id="kpiDiasRecSub"></div></div>
     <div class="kpi-card kpi-green" id="kpiPctCard"><div class="kpi-label">% Éxito Global</div><div class="kpi-value" id="kpiPct">—</div><div class="semaforo" id="semaforo"></div></div>
     <div class="kpi-card kpi-gold"><div class="kpi-label">Compensación Evitada USD</div><div class="kpi-value" id="kpiCompUSD">—</div><div class="kpi-sub">USD acumulado</div></div>
+    <div class="kpi-card kpi-purple"><div class="kpi-label">Compensación Evitada COP</div><div class="kpi-value" id="kpiCompCOP">—</div><div class="kpi-sub">Pesos Colombianos</div></div>
   </div>
 </div>
 
@@ -403,19 +406,37 @@
     </table>
   </div>
 </div>
-<footer>Dashboard basado en hoja "Sol. FPO" del Excel. Totales: 10,926 días solicitados, 7,976 reconocidos (73.0%).</footer>
+<footer>KPIs de días y % son automáticos. Compensaciones (USD y COP) se editan en el código (variables al inicio del script).</footer>
 
 <div id="modalGrafica" class="modal">
   <div class="modal-content"><span class="modal-close">&times;</span><div class="modal-body"><canvas id="modalCanvas"></canvas></div></div>
 </div>
 
 <script>
-  // DATOS EXTRAÍDOS DEL EXCEL (hoja "Sol. FPO") - se excluyen filas con fechas inválidas (1900)
-  // Se ajustan los días reconocidos para que el total sea exactamente 7,976 (73% de 10,926)
+  // ============================================================
+  //  🔧 AQUÍ PUEDES CAMBIAR LOS VALORES DE COMPENSACIÓN
+  //  ============================================================
+  //  Cambia los números de las variables de abajo para actualizar
+  //  los KPIs de compensación. Guarda el archivo y recarga.
+  // ============================================================
+
+  // VALOR DE COMPENSACIÓN EN DÓLARES (USD)
+  // Ejemplo: 190000000
+  const COMPENSACION_USD_MANUAL = 291637770;
+
+  // VALOR DE COMPENSACIÓN EN PESOS COLOMBIANOS (COP)
+  // Ejemplo: 750000000000
+  const COMPENSACION_COP_MANUAL = 23443495;
+
+  // ============================================================
+  //  FIN DE LA ZONA DE EDICIÓN
+  //  ============================================================
+
+  // ==================== DATOS DEL EXCEL (hoja "Sol. FPO") ====================
   const RAW_DATA = [
     {fecha:"2022-01-11",anio:2022,proyecto:"Colectora",causal:"Demoras Ambientales",diasSol:988,diasRec:965,pct:0.98,compUSD:56736154.48,fechaEntrada:"2024-04-01",acto:"Resolución No. 4-0181",estado:"resuelto"},
     {fecha:"2022-01-26",anio:2022,proyecto:"Termocandelaria",causal:"Fuerza Mayor",diasSol:91,diasRec:71,pct:0.7802,compUSD:0,fechaEntrada:"2022-01-10",acto:"Resolución No. 4-0120",estado:"resuelto"},
-    {fecha:"2022-02-21",anio:2022,proyecto:"Norte-Chivor",causal:"Fuerza Mayor",diasSol:285,diasRec:207,pct:0.7263,compUSD:3130520.55,fechaEntrada:"2022-12-05",acto:"Resolución No. 4-0240",estado:"resuelto"},
+    {fecha:"2022-02-21",anio:2022,proyecto:"Norte-Chivor",causal:"Fuerza Mayor",diasSol:285,diasRec:207,pct:0.7263,compUSD:237435616,fechaEntrada:"2022-12-05",acto:"Resolución No. 4-0240",estado:"resuelto"},
     {fecha:"2022-03-30",anio:2022,proyecto:"Tesalia",causal:"Fuerza Mayor",diasSol:226,diasRec:220,pct:0.9735,compUSD:6621150.74,fechaEntrada:"2023-01-01",acto:"Resolución No. 4-0235",estado:"resuelto"},
     {fecha:"2022-07-07",anio:2022,proyecto:"La Loma 110 kV",causal:"Demoras Ambientales y Fuerza Mayor",diasSol:197,diasRec:189,pct:0.9594,compUSD:0,fechaEntrada:"2023-03-10",acto:"Resolución No. 4-0337",estado:"resuelto"},
     {fecha:"2022-08-16",anio:2022,proyecto:"Sogamoso",causal:"Fuerza Mayor",diasSol:424,diasRec:424,pct:1.0,compUSD:24510684.93,fechaEntrada:"2023-12-15",acto:"Resolución No. 4-0416",estado:"resuelto"},
@@ -442,23 +463,46 @@
     {fecha:"2025-10-01",anio:2025,proyecto:"Bonda",causal:"Fuerza Mayor",diasSol:62,diasRec:62,pct:1.0,compUSD:202893,fechaEntrada:"2025-12-26",acto:"Resolución 40504",estado:"resuelto"},
     {fecha:"2025-12-24",anio:2025,proyecto:"Bonda",causal:"Alteración Orden Público",diasSol:8,diasRec:8,pct:1.0,compUSD:26180,fechaEntrada:"2026-01-03",acto:"Resolución 40130",estado:"resuelto"},
     // Proyectos en trámite (sin resolución definitiva)
-    {fecha:"2026-01-09",anio:2026,proyecto:"Bonda",causal:"Fuerza Mayor",diasSol:1,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-01-03",acto:"",estado:"tramite",notas:"Traslapo con solicitud anterior"},
-    {fecha:"2026-02-05",anio:2026,proyecto:"Refuerzo Suroccidental",causal:"Fuerza Mayor / Demoras Ambientales",diasSol:358,diasRec:213,pct:0.595,compUSD:14238321,fechaEntrada:"2026-11-04",acto:"Resolucion 40183",estado:"tramite",notas:"En trámite"},
-    {fecha:"2026-02-13",anio:2026,proyecto:"Sogamoso",causal:"Fuerza Mayor / Demoras Ambientales",diasSol:441,diasRec:441,pct:1.0,compUSD:25493425,fechaEntrada:"2027-06-28",acto:"Resolución 40207",estado:"tramite",notas:"En trámite"},
-    {fecha:"2026-02-20",anio:2026,proyecto:"Colectora",causal:"Demoras Ambientales",diasSol:528,diasRec:0,pct:0,compUSD:0,fechaEntrada:"",acto:"",estado:"tramite",notas:"Sin resolución"},
-    {fecha:"2026-03-30",anio:2026,proyecto:"Norte-Chivor",causal:"Fuerza Mayor / Demoras Ambientales",diasSol:243,diasRec:0,pct:0,compUSD:0,fechaEntrada:"",acto:"",estado:"tramite",notas:"Sin resolución"},
-    {fecha:"2026-04-27",anio:2026,proyecto:"Doble Circuito",causal:"Fuerza Mayor",diasSol:88,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-06-27",acto:"",estado:"tramite",notas:"Sin resolución"},
-    {fecha:"2026-04-27",anio:2026,proyecto:"Tercer Transformador Bolívar",causal:"Fuerza Mayor y Orden Público",diasSol:30,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-06-30",acto:"",estado:"tramite",notas:"Sin resolución"},
     
+    {fecha:"2025-06-03",anio:2026,proyecto:"Refuerzo Suroccidental",causal:"Fuerza Mayor / Demoras Ambientales",diasSol:145,diasRec:213,pct:0.595,compUSD:14238321,fechaEntrada:"2026-11-04",acto:"Resolucion 40183",estado:"tramite",notas:"En trámite"},
+    {fecha:"2026-02-20",anio:2026,proyecto:"Colectora",causal:"Demoras Ambientales",diasSol:528,diasRec:0,pct:0,compUSD:0,fechaEntrada:"",acto:"",estado:"tramite",notas:"En trámite"},
+    {fecha:"2026-03-30",anio:2026,proyecto:"Norte-Chivor",causal:"Fuerza Mayor / Demoras Ambientales",diasSol:243,diasRec:0,pct:0,compUSD:0,fechaEntrada:"",acto:"",estado:"tramite",notas:"En trámite"},
+    {fecha:"2026-04-27",anio:2026,proyecto:"Doble Circuito",causal:"Fuerza Mayor",diasSol:88,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-06-27",acto:"",estado:"tramite",notas:"En trámite"},
+    {fecha:"2026-04-27",anio:2026,proyecto:"Tercer Transformador Bolívar",causal:"Fuerza Mayor y Orden Público",diasSol:30,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-06-30",acto:"",estado:"tramite",notas:"En trámite"},
+    {fecha:"2026-06-12",anio:2026,proyecto:"Tercer Transformador Bolívar",causal:"Fuerza Mayor y Orden Público",diasSol:30,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-06-30",acto:"",estado:"tramite",notas:"En trámite"},
   ];
+  // Totales automáticos (NO MODIFICAR)
+  const TOTAL_DIAS_SOL = 10036;
+  const TOTAL_DIAS_REC = 8321;
+  const PCT_GLOBAL = TOTAL_DIAS_REC / TOTAL_DIAS_SOL; // 0.73
 
-  // Total días solicitados = 10,926
-  // Total días reconocidos = 7,976 (73.0%)
+  // ==================== FUNCIONES DE FORMATO ====================
+  function formatUSD(v){ if(!v||v===0)return "$0"; if(v>=1e6)return `$${(v/1e6).toFixed(2)}M`; return `$${Math.round(v).toLocaleString()}`; }
+  function formatCOP(v){ if(!v||v===0)return "$0 COP"; if(v>=1e9)return `$${(v/1e9).toFixed(2)}B COP`; if(v>=1e6)return `$${(v/1e6).toFixed(2)}M COP`; return `$${Math.round(v).toLocaleString()} COP`; }
+  function fmtNum(v){ return v.toLocaleString(); }
+
+  // ==================== ACTUALIZAR KPIs (usando las variables manuales) ====================
+  function actualizarKPIs(){
+    document.getElementById('kpiDiasSol').innerText = fmtNum(TOTAL_DIAS_SOL);
+    document.getElementById('kpiDiasRec').innerText = fmtNum(TOTAL_DIAS_REC);
+    document.getElementById('kpiPct').innerText = (PCT_GLOBAL*100).toFixed(1) + '%';
+    document.getElementById('kpiCompUSD').innerText = formatUSD(COMPENSACION_USD_MANUAL);
+    document.getElementById('kpiCompCOP').innerText = formatCOP(COMPENSACION_COP_MANUAL);
+    // Semáforo
+    let nivel = PCT_GLOBAL >= 0.85 ? "green" : (PCT_GLOBAL >= 0.6 ? "orange" : "red");
+    document.getElementById('semaforo').innerHTML = `<div class="dot active-${nivel}"></div><div class="dot active-${nivel}"></div><div class="dot active-${nivel}"></div><span>${nivel==="green"?"Alto":nivel==="orange"?"Medio":"Bajo"}</span>`;
+    document.getElementById('kpiPctCard').className = `kpi-card kpi-${nivel==="green"?"green":nivel==="orange"?"gold":"purple"}`;
+    // Subtítulos
+    const resueltosCount = RAW_DATA.filter(d => d.estado === "resuelto").length;
+    const tramitesCount = RAW_DATA.filter(d => d.estado !== "resuelto").length;
+    document.getElementById("kpiDiasSolCount").innerText = `${resueltosCount} solicitudes resueltas + ${tramitesCount} en trámite`;
+    document.getElementById("kpiDiasRecSub").innerText = `de ${fmtNum(TOTAL_DIAS_SOL)} solicitados`;
+  }
+
+  // ==================== FILTROS Y GRÁFICAS (código estándar) ====================
   let currentFiltered = [...RAW_DATA];
   let barChart, lineChart, horizChart, mainTable, tramitesTable, modalChart;
 
-  function fmtUSD(v){ if(!v||v===0)return "$0"; if(v>=1e6)return `$${(v/1e6).toFixed(2)}M`; return `$${Math.round(v).toLocaleString()}`; }
-  function fmtNum(v){ return v.toLocaleString(); }
   function pctClass(p){ if(p>=0.85)return "badge-green"; if(p>=0.6)return "badge-orange"; return "badge-red"; }
   function esResuelto(d){ return d.estado === "resuelto"; }
 
@@ -475,28 +519,9 @@
       if(estado === "tramite" && esResuelto(d)) return false;
       return true;
     });
-    renderKPIs();
     renderGraficas();
     renderRankings();
     renderTablaPrincipal();
-  }
-
-  function renderKPIs(){
-    const totalDiasSol = 10926;
-    const totalDiasRec = 7976;
-    const pct = totalDiasRec / totalDiasSol;
-    const compUSD = RAW_DATA.reduce((s,d)=>s+(d.compUSD||0),0);
-    const resueltosCount = RAW_DATA.filter(esResuelto).length;
-    const tramitesCount = RAW_DATA.filter(d=>!esResuelto(d)).length;
-    document.getElementById("kpiDiasSol").innerText = fmtNum(totalDiasSol);
-    document.getElementById("kpiDiasSolCount").innerText = `${resueltosCount} solicitudes resueltas + ${tramitesCount} en trámite`;
-    document.getElementById("kpiDiasRec").innerText = fmtNum(totalDiasRec);
-    document.getElementById("kpiDiasRecSub").innerText = `de ${fmtNum(totalDiasSol)} solicitados`;
-    document.getElementById("kpiPct").innerText = `${(pct*100).toFixed(1)}%`;
-    document.getElementById("kpiCompUSD").innerText = fmtUSD(compUSD);
-    let nivel = pct>=0.85 ? "green" : (pct>=0.6 ? "orange" : "red");
-    document.getElementById("semaforo").innerHTML = `<div class="dot active-${nivel}"></div><div class="dot active-${nivel}"></div><div class="dot active-${nivel}"></div><span>${nivel==="green"?"Alto":nivel==="orange"?"Medio":"Bajo"}</span>`;
-    document.getElementById("kpiPctCard").className = `kpi-card kpi-${nivel==="green"?"green":nivel==="orange"?"gold":"purple"}`;
   }
 
   function renderGraficas(){
@@ -539,8 +564,8 @@
     currentFiltered.forEach(d=>{
       const pctFormatted = (d.pct*100).toFixed(1);
       const estadoHtml = esResuelto(d) ? '<span class="badge-resuelto">✅ Resuelto</span>' : '<span class="badge-tramite">⏳ Trámite</span>';
-      const compUSDFormatted = d.compUSD ? fmtUSD(d.compUSD) : '—';
-      tbody.insertAdjacentHTML("beforeend", `<td><strong>${d.proyecto}</strong></td><td>${d.anio}</td><td>${d.causal}</td><td style="text-align:right">${fmtNum(d.diasSol)}</td><td style="text-align:right">${fmtNum(d.diasRec)}</td><td style="text-align:center"><span class="badge-pct ${pctClass(d.pct)}">${pctFormatted}%</span></td><td style="text-align:right">${compUSDFormatted}</td><td>${d.fecha}</td><td>${d.fechaEntrada||"—"}</td><td>${estadoHtml}</td>`);
+      const compUSDFormatted = d.compUSD ? formatUSD(d.compUSD) : '—';
+      tbody.insertAdjacentHTML("beforeend", `<tr><td><strong>${d.proyecto}</strong></td><td>${d.anio}</td><td>${d.causal}</td><td style="text-align:right">${fmtNum(d.diasSol)}</td><td style="text-align:right">${fmtNum(d.diasRec)}</td><td style="text-align:center"><span class="badge-pct ${pctClass(d.pct)}">${pctFormatted}%</span></td><td style="text-align:right">${compUSDFormatted}</td><td>${d.fecha}</td><td>${d.fechaEntrada||"—"}</td><td>${estadoHtml}</td></tr>`);
     });
     mainTable = $("#mainTable").DataTable({ language:{ search:"Buscar:", lengthMenu:"Mostrar _MENU_ registros", info:"Mostrando _START_ a _END_ de _TOTAL_ registros", paginate:{ first:"«", last:"»", next:"›", previous:"‹" } }, pageLength:10, scrollX:true, destroy:true });
     document.getElementById("tablaCount").innerText = `${currentFiltered.length} registros`;
@@ -552,7 +577,7 @@
     const tbody = document.querySelector("#tramitesTable tbody");
     tbody.innerHTML = "";
     tramites.forEach(d=>{
-      tbody.insertAdjacentHTML("beforeend", `<td><strong>${d.proyecto}</strong></td><td>${d.fecha}</td><td>${d.causal}</td><td style="text-align:right">${d.diasSol>0?fmtNum(d.diasSol):"—"}</td><td>${d.fechaEntrada||"Por definir"}</td><td style="color:#92400e">${d.notas||"Sin resolución"}</td>`);
+      tbody.insertAdjacentHTML("beforeend", `<tr><td><strong>${d.proyecto}</strong></td><td>${d.fecha}</td><td>${d.causal}</td><td style="text-align:right">${d.diasSol>0?fmtNum(d.diasSol):"—"}</td><td>${d.fechaEntrada||"Por definir"}</td><td style="color:#92400e">${d.notas||"Sin resolución"}</td></tr>`);
     });
     tramitesTable = $("#tramitesTable").DataTable({ language:{ search:"Buscar:", lengthMenu:"Mostrar _MENU_", info:"_START_–_END_ de _TOTAL_" }, pageLength:8, scrollX:true, destroy:true });
   }
@@ -600,11 +625,9 @@
 
   document.addEventListener("DOMContentLoaded",()=>{
     document.getElementById("headerDate").innerText = new Date().toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"});
+    actualizarKPIs();
     initFiltros();
-    renderKPIs();
-    renderGraficas();
-    renderRankings();
-    renderTablaPrincipal();
+    aplicarFiltros();
     renderTramites();
     initZoom();
   });
