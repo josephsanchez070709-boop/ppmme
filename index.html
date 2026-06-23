@@ -112,9 +112,9 @@
       line-height: 1.2;
       margin: 5px 0;
     }
+    /* Subtítulos ocultos (eliminados) */
     .kpi-sub {
-      font-size: 0.7rem;
-      color: #6b7280;
+      display: none;
     }
     .semaforo {
       display: flex;
@@ -369,11 +369,11 @@
 
 <div class="kpis">
   <div class="kpi-grid">
-    <div class="kpi-card kpi-blue"><div class="kpi-label">Total Días Solicitados</div><div class="kpi-value" id="kpiDiasSol">—</div><div class="kpi-sub" id="kpiDiasSolCount"></div></div>
-    <div class="kpi-card kpi-teal"><div class="kpi-label">Total Días Reconocidos</div><div class="kpi-value" id="kpiDiasRec">—</div><div class="kpi-sub" id="kpiDiasRecSub"></div></div>
+    <div class="kpi-card kpi-blue"><div class="kpi-label">Total Días Solicitados</div><div class="kpi-value" id="kpiDiasSol">—</div></div>
+    <div class="kpi-card kpi-teal"><div class="kpi-label">Total Días Reconocidos</div><div class="kpi-value" id="kpiDiasRec">—</div></div>
     <div class="kpi-card kpi-green" id="kpiPctCard"><div class="kpi-label">% Éxito Global</div><div class="kpi-value" id="kpiPct">—</div><div class="semaforo" id="semaforo"></div></div>
-    <div class="kpi-card kpi-gold"><div class="kpi-label">Compensación Evitada USD</div><div class="kpi-value" id="kpiCompUSD">—</div><div class="kpi-sub">USD acumulado</div></div>
-    <div class="kpi-card kpi-purple"><div class="kpi-label">Compensación Evitada COP</div><div class="kpi-value" id="kpiCompCOP">—</div><div class="kpi-sub">Pesos Colombianos</div></div>
+    <div class="kpi-card kpi-gold"><div class="kpi-label">Compensación Evitada USD</div><div class="kpi-value" id="kpiCompUSD">—</div></div>
+    <div class="kpi-card kpi-purple"><div class="kpi-label">Compensación Evitada COP</div><div class="kpi-value" id="kpiCompCOP">—</div></div>
   </div>
 </div>
 
@@ -381,7 +381,7 @@
   <div class="charts-grid">
     <div class="chart-card wide" id="chartCardBarras"><div class="chart-title">📊 Días Solicitados vs Reconocidos por Proyecto</div><div class="chart-body"><canvas id="barChart"></canvas></div></div>
     <div class="chart-card" id="chartCardAnual"><div class="chart-title">📈 Tendencia por Año</div><div class="chart-body"><canvas id="lineChart"></canvas></div></div>
-    
+   
   </div>
 </div>
 
@@ -412,7 +412,7 @@
     </table>
   </div>
 </div>
-<footer>Todos los KPIs y rankings se pueden editar desde las variables al inicio del script.</footer>
+<footer>Todos los KPIs, rankings y % éxito se editan desde las variables al inicio del script.</footer>
 
 <div id="modalGrafica" class="modal">
   <div class="modal-content"><span class="modal-close">&times;</span><div class="modal-body"><canvas id="modalCanvas"></canvas></div></div>
@@ -424,31 +424,36 @@
   //  ============================================================
 
   // ----- DÍAS SOLICITADOS Y RECONOCIDOS (totales) -----
-  const TOTAL_DIAS_SOL_MANUAL =  10036;   // Cambia este número
-  const TOTAL_DIAS_REC_MANUAL =  8321;    // Cambia este número
+  const TOTAL_DIAS_SOL_MANUAL = 10956;   // Cambia este número
+  const TOTAL_DIAS_REC_MANUAL = 8785;    // Cambia este número
+
+  // ----- % ÉXITO GLOBAL (0-100) -----
+  // Si quieres que se calcule automáticamente, comenta esta línea
+  // Si la descomentas, usará este valor fijo
+  const PCT_EXITO_GLOBAL_MANUAL = 81.0;   // Cambia este número
 
   // ----- COMPENSACIONES -----
-  const COMPENSACION_USD_MANUAL =  238576;  // USD
-  const COMPENSACION_COP_MANUAL =  23443495;          // COP
+  const COMPENSACION_USD_MANUAL = 308306;  // USD
+  const COMPENSACION_COP_MANUAL = 23443;          // COP
 
   // ----- MEJORES PROYECTOS (nombre y porcentaje) -----
-  // Edita los nombres y porcentajes de los mejores proyectos
   const MEJORES_PROYECTOS = [
-    { nombre: "Sogamoso", pct: 99.0 },
-    { nombre: "La Loma 110 kV", pct: 99.0 },
-     { nombre: "Colectora", pct: 99.0 },
-    { nombre: "Refuerzo Suroccidental", pct: 84.0 },
-    { nombre: "Doble Circuito", pct: 95.0 },
-    { nombre: "Norte-Chivor", pct: 87.0 },
-    { nombre: "Termocandelaria", pct: 89.0 },
-    { nombre: "Norte-Chivor", pct: 85.0 }
+    { nombre: "La Loma 110 kV", pct: 99 },
+  { nombre: "Sogamoso", pct: 98 },
+  { nombre: "Doble Circuito", pct: 95 },
+  { nombre: "Termocandelaria", pct: 89 },
+    { nombre: "Norte-Chivor", pct: 87 },
+    { nombre: "Refuerzo Suroccidental", pct: 84 },
+    { nombre: "Norte-Chivor", pct: 83.3 },
+    { nombre: "Colectora", pct: 80 },
   ];
 
   // ----- PEORES PROYECTOS (nombre y porcentaje) -----
-  // Edita los nombres y porcentajes de los peores proyectos
   const PEORES_PROYECTOS = [
-    { nombre: "Bonda", pct: 68.0 },
-    { nombre: "Tesalia", pct: 63.0 },
+   { nombre: "Tesalia", pct: 63 },
+   {nombre: "Bonda", pct: 64 },
+    
+     
   ];
 
   // ============================================================
@@ -486,10 +491,10 @@
     {fecha:"2025-10-01",anio:2025,proyecto:"Bonda",causal:"Fuerza Mayor",diasSol:62,diasRec:62,pct:1.0,compUSD:202893,fechaEntrada:"2025-12-26",acto:"Resolución 40504",estado:"resuelto"},
     {fecha:"2025-12-24",anio:2025,proyecto:"Bonda",causal:"Alteración Orden Público",diasSol:8,diasRec:8,pct:1.0,compUSD:26180,fechaEntrada:"2026-01-03",acto:"Resolución 40130",estado:"resuelto"},
     {fecha:"2026-03-30",anio:2026,proyecto:"Norte-Chivor",causal:"Fuerza Mayor / Demoras Ambientales",diasSol:243,diasRec:243,pct:1.0,compUSD:367495900,fechaEntrada:"29/01/2027",acto:"",estado:"resuelto",notas:"resuelto"},
+    {fecha:"2026-02-20",anio:2026,proyecto:"Colectora",causal:"Demoras Ambientales",diasSol:528,diasRec:221,pct:0.42,compUSD:1299346100,fechaEntrada:"22/09/2027",acto:"",estado:"tramite",notas:"En trámite"},
     // Proyectos en trámite (sin resolución definitiva)
     
     {fecha:"2025-06-03",anio:2026,proyecto:"Refuerzo Suroccidental",causal:"Fuerza Mayor / Demoras Ambientales",diasSol:145,diasRec:213,pct:0.595,compUSD:14238321,fechaEntrada:"2026-11-04",acto:"Resolucion 40183",estado:"tramite",notas:"En trámite"},
-    {fecha:"2026-02-20",anio:2026,proyecto:"Colectora",causal:"Demoras Ambientales",diasSol:528,diasRec:0,pct:0,compUSD:0,fechaEntrada:"",acto:"",estado:"tramite",notas:"En trámite"},
     {fecha:"2026-04-27",anio:2026,proyecto:"Doble Circuito",causal:"Fuerza Mayor",diasSol:88,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-06-27",acto:"",estado:"tramite",notas:"En trámite"},
     {fecha:"2026-04-27",anio:2026,proyecto:"Tercer Transformador Bolívar",causal:"Fuerza Mayor y Orden Público",diasSol:30,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-06-30",acto:"",estado:"tramite",notas:"En trámite"},
     {fecha:"2026-06-12",anio:2026,proyecto:"Tercer Transformador Bolívar",causal:"Fuerza Mayor y Orden Público",diasSol:30,diasRec:0,pct:0,compUSD:0,fechaEntrada:"2026-06-30",acto:"",estado:"tramite",notas:"En trámite"},
@@ -504,7 +509,13 @@
   function actualizarKPIs(){
     const diasSol = TOTAL_DIAS_SOL_MANUAL;
     const diasRec = TOTAL_DIAS_REC_MANUAL;
-    const pct = diasSol > 0 ? diasRec / diasSol : 0;
+    let pct = 0;
+    // Verificar si se definió % éxito manual
+    if (typeof PCT_EXITO_GLOBAL_MANUAL !== 'undefined' && PCT_EXITO_GLOBAL_MANUAL !== null) {
+      pct = PCT_EXITO_GLOBAL_MANUAL / 100; // Convertir de 0-100 a decimal
+    } else {
+      pct = diasSol > 0 ? diasRec / diasSol : 0;
+    }
 
     document.getElementById('kpiDiasSol').innerText = fmtNum(diasSol);
     document.getElementById('kpiDiasRec').innerText = fmtNum(diasRec);
@@ -512,16 +523,10 @@
     document.getElementById('kpiCompUSD').innerText = formatUSD(COMPENSACION_USD_MANUAL);
     document.getElementById('kpiCompCOP').innerText = formatCOP(COMPENSACION_COP_MANUAL);
 
-    // Semáforo
+    // Semáforo según el porcentaje (manual o calculado)
     let nivel = pct >= 0.85 ? "green" : (pct >= 0.6 ? "orange" : "red");
     document.getElementById('semaforo').innerHTML = `<div class="dot active-${nivel}"></div><div class="dot active-${nivel}"></div><div class="dot active-${nivel}"></div><span>${nivel==="green"?"Alto":nivel==="orange"?"Medio":"Bajo"}</span>`;
     document.getElementById('kpiPctCard').className = `kpi-card kpi-${nivel==="green"?"green":nivel==="orange"?"gold":"purple"}`;
-
-    // Subtítulos
-    const resueltosCount = RAW_DATA.filter(d => d.estado === "resuelto").length;
-    const tramitesCount = RAW_DATA.filter(d => d.estado !== "resuelto").length;
-    document.getElementById("kpiDiasSolCount").innerText = `${resueltosCount} solicitudes resueltas + ${tramitesCount} en trámite`;
-    document.getElementById("kpiDiasRecSub").innerText = `de ${fmtNum(diasSol)} solicitados`;
   }
 
   // ==================== FILTROS Y GRÁFICAS ====================
@@ -574,13 +579,11 @@
 
   // ==================== RANKINGS (USANDO VALORES MANUALES) ====================
   function renderRankings(){
-    // Generar HTML para mejores proyectos
     document.getElementById("rankingTop").innerHTML = MEJORES_PROYECTOS.map((item, i) => {
       const pct = item.pct;
       return `<div class="rank-item"><div class="rank-pos">${i+1}</div><div class="rank-name">${item.nombre}</div><div class="rank-bar"><div class="rank-fill" style="width:${pct}%; background:#22c55e"></div></div><div class="rank-pct">${pct.toFixed(1)}%</div></div>`;
     }).join("");
 
-    // Generar HTML para peores proyectos
     document.getElementById("rankingBottom").innerHTML = PEORES_PROYECTOS.map((item, i) => {
       const pct = item.pct;
       return `<div class="rank-item"><div class="rank-pos">${i+1}</div><div class="rank-name">${item.nombre}</div><div class="rank-bar"><div class="rank-fill" style="width:${pct}%; background:#ef4444"></div></div><div class="rank-pct">${pct.toFixed(1)}%</div></div>`;
@@ -663,4 +666,4 @@
   });
 </script>
 </body>
-</html> 
+</html>
